@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Викторина: Случайные слова</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 0 auto;
+            max-width: 600px;
+        }
+        .question {
+            margin: 20px;
+            font-size: 24px;
+        }
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        button {
+            padding: 10px;
+            font-size: 18px;
+            cursor: pointer;
+        }
+        .result {
+            margin-top: 20px;
+            font-size: 20px;
+        }
+        .language-selector {
+            margin: 20px;
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Викторина: Случайные слова</h1>
+
+    <!-- Селектор выбора языка -->
+    <div class="language-selector">
+        <label for="language">Выберите направление:</label>
+        <select id="language" onchange="resetQuiz()">
+            <option value="etToRu">Эстонский → Русский</option>
+            <option value="ruToEt">Русский → Эстонский</option>
+        </select>
+    </div>
+
+    <div class="question"></div>
+    <div class="options"></div>
+    <div class="result"></div>
+    <button onclick="nextQuestion()">Следующий вопрос</button>
+
+    <script>
+        // Массив данных
+        const words = [
+            ["allpool", "ниже, внизу"],
+            ["apteek/er,-ri, -rit" , "аптекарь"],
+            ["palve,palve,palvet" , "просьба"],
+            ["muretse/ma, -da, -n" , "беспокоится,волноватся"],
+            ["isedi" , "даже"],
+            ["vasta/ma, -ta, -n" , "ответить"],
+            ["jõudma, jõuda, jõuan" , "приходить,достигатть,прийти,прибыть"],
+            ["palveta/ma, -da, -n" , "молится"],
+            ["tšek/k, -i, -ki" , "чек"],
+            ["kätte saama, kätte saada, saan kätte" , "получать (на руки)"],
+            ["esita/ma, -da, -n" , "представлять, показывать"],
+            ["digi/retsept, -retsepti,-retsepti" , "дигитальный рецепт"],
+            ["rohi, rohu, rohtu" , "лекарство"],
+            ["ravim, -i, -it" , "лекарство"],
+            ["välja kirjutama, välja kirjutada, kirjutan välja" , "выписывать"],
+            ["täht/is, -sa, -sat" , "важный"],
+            ["muu, -, -d" , "другое"],
+            ["odav, -a, -at" , "дешевый"],
+            ["vahe, -, -t" , "разница,промежуток,интервал,дистанция"],
+            ["maitse, maitse, maitset" , "вкус"],
+            ["söö/k, -gi, -ki" , "еда"],
+            ["pärast" , "из-за, через, после"],
+            ["ajal" , "вовремя"],
+            ["peale" , "после, кроме, наверх"],
+            ["paiku" , "около,примерно"],
+            ["käte/kreem, -kreemi, -kreemi" , "крем для рук"],
+            ["kõõma/šampoon, -šampooni, -šampooni" , "шампунь от перхоти"],
+            ["kraadi/klaas, -klaasi, -klaasi" , "градусник"],
+            ["pik/k, -a, -ka" , "длинный"],
+            ["köha/rohi, -rohu, -rohtu" , "лекарство от кашля"],
+            ["sinepi/plaaster, -plaastri, -plaastrit" , "горчичник"],
+            ["plaast/er, -ri, -rit" , " пластырь"],
+            ["hamba/pasta, -pasta, -pastat" , "зубная паста"],
+            ["ravim/tee, -tee, -teed" , "лечебный чай"],
+            ["südame/rohi, -rohu, -rohtu" , "лекарство от болезней сердца"],
+            ["köha/siirup, -siirupi, -siirupit" , "сироп от кашля"],
+            ["aerosool, aerosooli, aerosooli" , "аэрозоль"],
+            ["tablet/t, -i, -ti" , " таблетка"],
+            ["imemis/tablett, -tableti, -tabletti" , "таблетка для рассасывания"],
+            ["siirup, -i, -it" , "сироп"],
+            ["salv, salvi, salvi" , " мазь"],
+            ["pulb/er, -ri, -rit" , " порошок"],
+            ["tilk/a, -ga, -ka" , "капля"],
+            ["geel, geeli, geeli" ," гель "],           
+            ["külm, külma, külma" , "холодный"],
+            ["allergia, -,-t" , "алергия"],
+            ["suitsetami/ne, -se,-st" , "курение"],
+            ["vastu" , "против"],
+            ["lihas/valu, -valu, -valu" , "мышечная боль"],
+            ["ravim/taim,-taime, -taime" , "лекарственное растение"],
+            ["loodus/toode, -toote,-toodet" , "природный продукт"],
+            ["suu/hügieen, -hügieeni,-hügieeni" , "гигиена рта"],
+            ["haava/hooldus,-hoolduse,-hooldust" ,"уход за раной"],
+            ["vitamiin, vitamiini, vitamiini" , "витамин"],           
+            ["hügieeni/toode,-toote, -toodet" , "товары (личной) гигиены"],
+            ["laste/toode, -toote,-toodet" , "товар для детей"],
+            ["noor,-e,-t" , "молодой"],
+            ["lemmik/loom, -looma,-looma" , "домашний любимец"],
+            ["valu, -,-" , "боль"],
+            ["külmetus, -e, -t" , "простуда"],
+            ["retsepti/ravim, -ravimi, -ravimit" , "лекарство по рецепту"],
+            ["väljastami/ne, -se, -st" , "выдача"],
+            ["valve/apteek,-apteegi, -apteeki" , "дежурная аптека"],   
+            ["haigeks jääma, haigeks jääda, jään haigeks" , "заболевать"],
+            ["külma saama, külma saada, saan külma" , "простужатся"],
+            ["terve,-,-t" , "здоровый"],
+            ["terve olema, terve olla, olen terve" , "быть здоровым"],
+            ["terveks saama, terveks saada, saan terveks" , "выздоравливать"],
+            ["ruttu" , "быстро"],
+            ["nina,-,-" ,"нос"],
+            ["juuksed, juuste, juukseid" , "волосы"],
+            ["silm, silma, silma" , "глаз"],
+            ["kõrv, kõrva, kõrva" , "ухо"],
+            ["hammas, hamba,hammast" , "3y6"],
+            ["sel/g,-ja,-ga" , " спина"],
+            ["suu, -,-d" , " рот"],
+            ["süda, -me,-nt" , "сердце"],
+            ["põlv, põlve, põlve" , "колено"],
+            ["sõrm, sõrme, sõrme" , "палец руки"],
+            ["varvas, varba, -t" , "палец ноги"],
+            ["kael, kaela, kaela" , "шея"],
+            ["õl/g,-a, -ga" , "плечо"],
+            ["komplimen/t, -di, -ti" , "комплимент"],
+            ["vurrud, -e, vurre" , "усы (животного)"],
+            ["ripsmed, ripsmete, ripsmeid" , "бровь"],
+            ["kulm, kulmu, kulmu" , "бровь"],
+            ["vuntsid,-e, vuntse" , "усы (человека)"],
+            ["habe,-me,-t" , "борода"],         
+            ["plaast/er, -ri, -rit" , "пластырь"]
+         ];
+            
+
+        // Переменные для текущего состояния
+        let currentQuestion = null;
+        let options = [];
+        let correctAnswer = "";
+        let languageDirection = "etToRu"; // Направление: с эстонского на русский по умолчанию
+
+        // Функция для обновления направления языка
+        function resetQuiz() {
+            languageDirection = document.getElementById('language').value;
+            nextQuestion(); // Начинаем новую викторину
+        }
+
+        // Функция для генерации случайного вопроса
+        function nextQuestion() {
+            document.querySelector('.result').textContent = ""; // Сброс результата
+
+            // Выбираем случайное слово
+            const randomIndex = Math.floor(Math.random() * words.length);
+            if (languageDirection === "etToRu") {
+                currentQuestion = words[randomIndex][0];
+                correctAnswer = words[randomIndex][1];
+            } else {
+                currentQuestion = words[randomIndex][1];
+                correctAnswer = words[randomIndex][0];
+            }
+
+            // Генерируем случайные ответы
+            options = [correctAnswer];
+            while (options.length < 4) {
+                const randomOption =
+                    languageDirection === "etToRu"
+                        ? words[Math.floor(Math.random() * words.length)][1]
+                        : words[Math.floor(Math.random() * words.length)][0];
+                if (!options.includes(randomOption)) {
+                    options.push(randomOption);
+                }
+            }
+
+            // Перемешиваем варианты
+            options = options.sort(() => Math.random() - 0.5);
+
+            // Отображаем вопрос и варианты
+            document.querySelector('.question').textContent = 
+                languageDirection === "etToRu"
+                ? `Что означает слово "${currentQuestion}" на русском?`
+                : `Что означает слово "${currentQuestion}" на эстонском?`;
+
+            const optionsContainer = document.querySelector('.options');
+            optionsContainer.innerHTML = ""; // Очистка старых кнопок
+
+            options.forEach(option => {
+                const button = document.createElement('button');
+                button.textContent = option;
+                button.onclick = () => checkAnswer(option);
+                optionsContainer.appendChild(button);
+            });
+        }
+
+        // Проверка ответа
+        function checkAnswer(selectedAnswer) {
+            const result = document.querySelector('.result');
+            if (selectedAnswer === correctAnswer) {
+                result.textContent = "✅ Правильно!";
+                result.style.color = "green";
+            } else {
+                result.textContent = `❌ Неправильно. Правильный ответ: ${correctAnswer}`;
+                result.style.color = "red";
+            }
+        }
+
+        // Стартовая загрузка
+        nextQuestion();
+    </script>
+</body>
+</html>
+
+
+
+
+
+
+
+
